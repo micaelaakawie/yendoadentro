@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>desde adentro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #FAFAF8;
+      --fg: #1a1a1a;
+      --muted: #78716c;
+      --border: #e7e5e4;
+      --white: #ffffff;
+      --yellow: #F7B500;
+      --yellow-light: #fff8e1;
+      --yellow-dark: #d9a100;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    ::selection { background: #ffe566; }
+
+    /* ── Header ── */
+    .header {
+      position: sticky; top: 0; z-index: 10;
+      border-bottom: 1px solid #222;
+      background: #000;
+    }
+    .header-inner {
+      max-width: 1024px; margin: 0 auto;
+      padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      font-size: 17px; font-weight: 700;
+      letter-spacing: -0.4px; color: #fff;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+    }
+    .logo-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--yellow);
+      flex-shrink: 0;
+    }
+    .header-sub {
+      font-size: 13px; color: #fff; font-weight: 500;
+    }
+
+    /* ── Views ── */
+    #view-home   { display: block; }
+    #view-aspect { display: none; }
+
+    /* ── Hero ── */
+    .hero {
+      max-width: 700px; margin: 0 auto;
+      padding: 72px 24px 44px;
+      text-align: center;
+      position: relative;
+    }
+    .hero-label {
+      display: inline-flex; align-items: center;
+      background: var(--yellow);
+      color: #000;
+      border: none;
+      border-radius: 999px;
+      padding: 5px 16px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero-title {
+      font-size: clamp(28px, 5vw, 46px);
+      font-weight: 700; line-height: 1.18;
+      color: var(--fg); margin-bottom: 20px;
+      letter-spacing: -0.5px;
+    }
+    .hero-title span {
+      position: relative; display: inline-block;
+    }
+    .hero-title span::after {
+      content: '';
+      position: absolute; bottom: 2px; left: 0; right: 0;
+      height: 3px; background: var(--yellow);
+      border-radius: 2px; opacity: 1;
+    }
+    .hero-desc {
+      font-size: 15px; color: var(--muted);
+      line-height: 1.75; max-width: 460px; margin: 0 auto;
+    }
+
+    /* ── Decorative circles ── */
+    .deco {
+      position: absolute; border-radius: 50%;
+      background: #c0bdb9; opacity: 0.07;
+      pointer-events: none;
+    }
+    .deco-1 { width: 180px; height: 180px; top: -40px; right: -60px; }
+    .deco-2 { width: 90px;  height: 90px;  bottom: 0;  left: -30px; opacity: 0.05; }
+
+    /* ── Grid ── */
+    .grid {
+      max-width: 1024px; margin: 0 auto;
+      padding: 0 24px 80px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    @media (min-width: 560px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 800px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .card {
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px; padding: 28px 16px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      cursor: pointer;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      min-height: 144px; text-align: center;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.09);
+      border-color: #d6d3d1;
+    }
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      transition: transform 0.22s ease;
+    }
+    .card:hover .card-icon { transform: scale(1.12); }
+    .card-name { font-size: 13px; font-weight: 600; color: var(--fg); line-height: 1.3; }
+    .card-desc { font-size: 11px; color: #a8a29e; margin-top: 2px; }
+    .card-bar {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2.5px; border-radius: 0 0 18px 18px;
+      opacity: 0; transition: opacity 0.22s ease;
+    }
+    .card:hover .card-bar { opacity: 1; }
+
+    /* ── Aspect view ── */
+    .aspect-content {
+      max-width: 700px; margin: 0 auto;
+      padding: 60px 24px 80px;
+      min-height: calc(100vh - 65px);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 32px;
+    }
+
+    .aspect-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      border-radius: 999px; padding: 6px 18px;
+      font-size: 13px; font-weight: 600;
+    }
+
+    .question-wrap { text-align: center; max-width: 620px; }
+    .question-text {
+      font-size: clamp(20px, 4vw, 32px);
+      font-weight: 600; line-height: 1.5;
+      color: var(--fg);
+    }
+
+    .divider {
+      width: 40px; height: 2px;
+      border-radius: 999px; opacity: 0.25;
+    }
+
+    .actions {
+      display: flex; flex-wrap: wrap;
+      gap: 10px; justify-content: center;
+    }
+    .btn {
+      border-radius: 999px; padding: 11px 24px;
+      font-size: 13px; font-weight: 600;
+      font-family: inherit; cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap; letter-spacing: 0.01em;
+    }
+    .btn-yellow {
+      background: var(--yellow);
+      border: 1.5px solid var(--yellow);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(247,181,0,0.28);
+    }
+    .btn-yellow:hover { background: var(--yellow-dark); border-color: var(--yellow-dark); }
+    .btn-yellow:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-outline {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      color: var(--fg);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .btn-outline:hover { border-color: #a8a29e; }
+    .btn-back {
+      background: none; border: none;
+      color: var(--muted); cursor: pointer;
+      font-size: 13px; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 0; transition: color 0.18s;
+    }
+    .btn-back:hover { color: var(--fg); }
+
+    .hint { font-size: 12px; color: #a8a29e; text-align: center; }
+
+    /* ── History ── */
+    .history-wrap { width: 100%; max-width: 560px; }
+    .history-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .history-toggle {
+      width: 100%; background: var(--white);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      cursor: pointer; font-family: inherit;
+      transition: border-color 0.18s;
+    }
+    .history-toggle:hover { border-color: #a8a29e; }
+    .chevron { transition: transform 0.2s; font-size: 10px; color: #a8a29e; }
+    .chevron.open { transform: rotate(180deg); }
+
+    .history-list {
+      display: none; margin-top: 6px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .history-list.open { display: block; }
+    .history-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f5f5f4;
+    }
+    .history-item:last-child { border-bottom: none; }
+    .history-q { font-size: 13px; color: var(--fg); line-height: 1.5; }
+    .history-meta {
+      margin-top: 4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .history-date { font-size: 11px; color: #a8a29e; }
+    .history-empty { padding: 20px; text-align: center; font-size: 13px; color: #a8a29e; }
+    .history-note {
+      font-size: 11px; color: #a8a29e;
+      margin-top: 8px; text-align: center;
+    }
+    .history-note span {
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+
+    /* ── Footer ── */
+    /* ── CTA ── */
+    .cta-section {
+      background: #111;
+      padding: 56px 24px;
+      text-align: center;
+    }
+    .cta-inner { max-width: 560px; margin: 0 auto; }
+    .cta-icon {
+      font-size: 28px; margin-bottom: 16px;
+    }
+    .cta-title {
+      font-size: 20px; font-weight: 700;
+      color: #fff; margin-bottom: 12px;
+      line-height: 1.4; letter-spacing: -0.2px;
+    }
+    .cta-desc {
+      font-size: 15px; color: rgba(255,255,255,0.65);
+      line-height: 1.75; margin-bottom: 14px;
+    }
+    .cta-desc strong { color: #fff; font-weight: 600; }
+    .cta-tagline {
+      font-size: 13px; font-weight: 800;
+      color: var(--yellow); letter-spacing: 0.15em;
+      margin-bottom: 24px;
+    }
+    .btn-hablemos {
+      display: inline-block;
+      background: #dc2626;
+      color: #fff;
+      border: none; border-radius: 999px;
+      padding: 13px 32px;
+      font-size: 15px; font-weight: 700;
+      font-family: inherit; cursor: pointer;
+      letter-spacing: 0.01em;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 16px rgba(220,38,38,0.35);
+    }
+    .btn-hablemos:hover { background: #b91c1c; transform: translateY(-1px); }
+
+    /* ── Footer ── */
+    .footer {
+      background: #000;
+      border-top: 1px solid #222;
+      padding: 24px 24px 28px;
+      text-align: center;
+    }
+    .footer-copy {
+      font-size: 12px; color: #fff; font-weight: 500;
+      margin-bottom: 14px;
+    }
+    .footer-icons {
+      display: flex; align-items: center; justify-content: center; gap: 18px;
+    }
+    .footer-icons a {
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px; border-radius: 50%;
+      background: transparent; border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.6);
+      transition: border-color 0.2s, color 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+    }
+    .footer-icons a:hover {
+      border-color: var(--yellow);
+      color: var(--yellow);
+      box-shadow: 0 2px 8px rgba(247,181,0,0.25);
+    }
+    .footer-icons svg { width: 17px; height: 17px; }
+
+    /* ── Animations ── */
+    .fade-in {
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <span class="logo" id="logo-btn">
+      <span class="logo-dot"></span>
+      desde adentro
+    </span>
+    <span class="header-sub" id="header-sub">Preguntas que invitan a ir más profundo</span>
+  </div>
+</header>
+
+<!-- HOME VIEW -->
+<div id="view-home">
+  <section class="hero">
+    <div class="deco deco-1"></div>
+    <div class="deco deco-2"></div>
+    <p class="hero-label">reflexión personal</p>
+    <h2 class="hero-title">
+      ¿Sobre qué <span>ámbito de tu vida</span><br>querés reflexionar hoy?
+    </h2>
+    <p class="hero-desc">
+      Elegí un ámbito y recibí una pregunta poderosa diseñada para invitarte a mirar hacia adentro con honestidad y curiosidad.
+    </p>
+  </section>
+  <section class="grid" id="aspect-grid"></section>
+</div>
+
+<!-- ASPECT VIEW -->
+<div id="view-aspect">
+  <div class="aspect-content">
+    <div id="aspect-badge" class="aspect-badge"></div>
+    <div class="question-wrap fade-in">
+      <p class="question-text" id="question-text"></p>
+    </div>
+    <div class="divider" id="divider"></div>
+    <div class="actions">
+      <button class="btn btn-yellow" id="btn-next">Otra pregunta</button>
+    </div>
+    <button class="btn-back" id="btn-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Volver a los ámbitos de tu vida
+    </button>
+    <p class="hint">Tomá el tiempo que necesités para sentir la pregunta.</p>
+    <div class="history-wrap">
+      <button class="history-toggle" id="history-toggle">
+        <span>Historial de preguntas</span>
+        <span class="chevron" id="history-chevron">&#x25BC;</span>
+      </button>
+      <div class="history-list" id="history-list"></div>
+      <p class="history-note"><span>&#128337; El historial se conserva por 7 días.</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- CTA + FOOTER (visible en todas las vistas) -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <div class="cta-icon">💡</div>
+    <p class="cta-title">¿Querés seguir profundizando?</p>
+    <p class="cta-desc">
+      Si querés seguir trabajando sobre estos y otros ámbitos de tu vida
+      en un proceso individual, <strong>contás conmigo.</strong>
+    </p>
+    <p class="cta-tagline">¡ESTOY PARA ACOMPAÑARTE!</p>
+    <a href="mailto:micaela@forwhat.com.ar" class="btn-hablemos">¡Hablemos!</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <p class="footer-copy">desde adentro &mdash; un espacio para encontrarte</p>
+  <div class="footer-icons">
+    <!-- LinkedIn -->
+    <a href="https://www.linkedin.com/in/micaelaakawie/" target="_blank" rel="noopener" aria-label="LinkedIn">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zm1.78 13.02H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/>
+      </svg>
+    </a>
+    <!-- Instagram -->
+    <a href="https://www.instagram.com/aka.mica/" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.975.975 1.246 2.242 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.975.975-2.242 1.246-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.975-.975-1.246-2.242-1.308-3.608C2.175 15.584 2.163 15.204 2.163 12s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608.975-.975 2.242-1.246 3.608-1.308C8.416 2.175 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.332.014 7.052.072 5.197.157 3.355.673 2.014 2.014.673 3.355.157 5.197.072 7.052.014 8.332 0 8.741 0 12c0 3.259.014 3.668.072 4.948.085 1.855.601 3.697 1.942 5.038 1.341 1.341 3.183 1.857 5.038 1.942C8.332 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 1.855-.085 3.697-.601 5.038-1.942 1.341-1.341 1.857-3.183 1.942-5.038C23.986 15.668 24 15.259 24 12c0-3.259-.014-3.668-.072-4.948-.085-1.855-.601-3.697-1.942-5.038C20.645.673 18.803.157 16.948.072 15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+      </svg>
+    </a>
+    <!-- Email -->
+    <a href="mailto:micaela@forwhat.com.ar" aria-label="Enviar email">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2"/>
+        <path d="M2 7l10 7 10-7"/>
+      </svg>
+    </a>
+  </div>
+</footer>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+
+const ASPECTS = [
+  { slug:"trabajo",               name:"Trabajo",               icon:"💼", desc:"Tu carrera y propósito laboral",   accent:"#475569", light:"#f1f5f9" },
+  { slug:"finanzas",              name:"Finanzas",              icon:"💰", desc:"Tu relación con el dinero",        accent:"#4d7c0f", light:"#f7fee7" },
+  { slug:"amigos",                name:"Amigos",                icon:"🤝", desc:"Tus vínculos de amistad",         accent:"#92400e", light:"#fffbeb" },
+  { slug:"salud",                 name:"Salud",                 icon:"🌿", desc:"Tu cuerpo y bienestar",            accent:"#166534", light:"#f0fdf4" },
+  { slug:"familia",               name:"Familia",               icon:"🏡", desc:"Tus lazos familiares",             accent:"#9a3412", light:"#fff7ed" },
+  { slug:"pareja",                name:"Pareja",                icon:"❤️", desc:"Tu relación romántica",            accent:"#9f1239", light:"#fff1f2" },
+  { slug:"futuro",                name:"Futuro",                icon:"🔭", desc:"Tu visión a largo plazo",          accent:"#3730a3", light:"#eef2ff" },
+  { slug:"proyecciones",          name:"Proyecciones",          icon:"📊", desc:"Tus metas y proyectos",            accent:"#1e40af", light:"#eff6ff" },
+  { slug:"desarrollo-personal",   name:"Desarrollo personal",   icon:"🌱", desc:"Tu crecimiento interior",          accent:"#065f46", light:"#ecfdf5" },
+  { slug:"desarrollo-profesional",name:"Desarrollo profesional",icon:"📈", desc:"Tu evolución en la carrera",       accent:"#1e3a5f", light:"#e8f4fd" },
+  { slug:"naturaleza",            name:"Naturaleza",            icon:"🍃", desc:"Tu conexión con el entorno",       accent:"#14532d", light:"#f0fdf4" },
+  { slug:"espiritualidad",        name:"Espiritualidad",        icon:"✨", desc:"Tu dimensión espiritual",          accent:"#6b21a8", light:"#faf5ff" },
+];
+
+const QUESTIONS = {
+  "trabajo": [
+    "¿Qué parte de tu trabajo actual te conecta con quien realmente sos?",
+    "¿De qué manera tu trabajo expresa tus valores más profundos?",
+    "¿Qué talento tuyo está siendo desaprovechado en tu rol actual?",
+    "¿Qué miedo específico te frena de dar el siguiente paso en tu carrera?",
+    "¿Qué cambiarías primero si pudieras rediseñar tu trabajo desde cero?",
+    "¿Qué tipo de trabajo te haría perder la noción del tiempo?",
+    "¿Qué legado querés dejar en el ámbito profesional?",
+    "¿Qué es lo que más te cuesta de tu trabajo y qué dice eso de vos?",
+    "¿Qué habilidades querés desarrollar en los próximos años?",
+    "¿Cuándo fue la última vez que sentiste orgullo genuino por algo que lograste profesionalmente?",
+    "¿Qué decisión laboral has estado postergando?",
+    "¿Qué cambiaría en tu vida si hicieras el trabajo que realmente soñás?",
+    "¿De qué manera tu trabajo contribuye al mundo o a las personas que te importan?",
+    "¿Qué aprendiste de tu peor experiencia laboral?",
+    "¿Qué aspecto de tu trabajo te genera más energía?",
+    "¿Cómo definirías el éxito en tu carrera con tus propias palabras?",
+    "¿Qué sacrificás en tu vida personal por tu trabajo?",
+    "¿Cuánto de tu identidad está construida alrededor de tu trabajo?",
+    "¿Qué tipo de profesional o líder querés ser dentro de 5 años?",
+    "¿Qué te impide pedir lo que realmente querés en tu trabajo?",
+    "¿Qué aprendizaje de tu trabajo actual te va a servir siempre?",
+    "¿Qué conversación laboral importante has evitado tener?",
+    "¿Qué patrón repetitivo notás en tu vida laboral?",
+    "¿Cómo sería tu vida en 5 años si seguís el camino laboral que tenés hoy?",
+    "¿Qué cosa nueva querés probar en tu carrera?",
+    "¿Qué necesitás para sentirte más realizado en tu trabajo?",
+    "¿Cómo influyeron las expectativas de otros en las decisiones laborales que tomaste?",
+    "¿Qué te gustaría que te dijeran al final de tu carrera profesional?",
+    "¿Qué recursos internos tuyos no estás usando en tu trabajo?",
+    "¿Cómo cambiaría tu enfoque si supieras que tenés 3 años para lograr algo importante?",
+    "¿Qué te dice tu cuerpo en el trabajo que tu mente suele ignorar?",
+    "¿Cuánto espacio le das a la creatividad en lo que hacés profesionalmente?",
+    "¿Qué significaría para vos sentirte completamente satisfecho con tu vida laboral?",
+    "¿Cómo describirías tu relación con la autoridad en tu ámbito laboral?",
+    "¿Qué tipo de impacto querés generar con tu trabajo?",
+    "¿Qué trabajo harías aunque no te pagaran?",
+    "¿Cómo sería tu jornada laboral ideal?",
+    "¿Qué es lo que más te paraliza cuando pensás en cambios en tu carrera?",
+    "¿Qué persona en tu vida laboral te influyó más positivamente?",
+    "¿Cómo usás el fracaso laboral para crecer?",
+    "¿Qué aspectos de tu personalidad se expresan mejor en el trabajo?",
+    "¿De qué manera el dinero afecta las decisiones que tomás en tu carrera?",
+    "¿Qué trabajo querías hacer de niño y qué tiene en común con lo que hacés hoy?",
+    "¿Cuánta energía le dedicás a construir el futuro laboral que querés?",
+    "¿Qué parte de tu trabajo hacés desde el miedo y cuál desde la vocación?",
+    "¿Cómo describirías tu relación con el trabajo a alguien que no te conoce?",
+    "¿Cuándo sentiste por última vez que tu trabajo tenía un propósito claro?",
+    "¿Qué pregunta sobre tu carrera llevás tiempo evitando responderte?",
+    "¿Qué versión de vos mismo aparece en el trabajo y cuánto se parece al que sos en el resto de tu vida?",
+    "¿De qué manera lo que hacés todos los días te acerca o te aleja de quien querés ser?",
+  ],
+  "finanzas": [
+    "¿Qué creencia sobre el dinero heredaste de tu familia?",
+    "¿De qué manera tu relación con el dinero refleja tus valores?",
+    "¿En qué gastarías tu dinero si tu seguridad económica estuviera garantizada?",
+    "¿Qué decisión financiera has estado evitando tomar?",
+    "¿Cuánto de tu ansiedad cotidiana está vinculada a tus finanzas?",
+    "¿Qué representa el dinero para vos: libertad, seguridad, poder, o algo más?",
+    "¿Cuál es la diferencia entre lo que necesitás y lo que querés en términos económicos?",
+    "¿Cuándo fue la última vez que tomaste una decisión financiera desde el miedo?",
+    "¿Qué patrón se repite en tu relación con el dinero a lo largo de los años?",
+    "¿De qué manera el dinero que tenés (o no tenés) limita quién querés ser?",
+    "¿Qué mensaje recibiste de niño sobre el dinero que sigue influyendo hoy?",
+    "¿Cómo sería tu vida si tu relación con el dinero fuera completamente diferente?",
+    "¿Para qué querés el dinero en última instancia?",
+    "¿Qué te impide tomar el control de tu situación financiera?",
+    "¿Cómo describirías tu relación con el gasto y el ahorro?",
+    "¿Cuánto de tus decisiones cotidianas están guiadas por el dinero?",
+    "¿Qué significaría para vos tener suficiente dinero?",
+    "¿Qué conversación sobre dinero nunca tuviste y necesitás tener?",
+    "¿Cómo afecta tu situación financiera tu estado de ánimo diario?",
+    "¿Qué sacrificás o dejás de hacer por razones económicas?",
+    "¿Cuándo empezaste a relacionarte con el dinero de la manera en que lo hacés hoy?",
+    "¿Qué diferencia hay entre lo que ganás y lo que sentís que merecés ganar?",
+    "¿De qué manera el dinero aparece en tus conflictos más importantes?",
+    "¿Cuánta libertad te da realmente el dinero que tenés?",
+    "¿Qué emociones sentís cuando pensás en tu situación económica actual?",
+    "¿Qué harías diferente si empezaras desde cero económicamente?",
+    "¿Para qué usás el dinero como excusa?",
+    "¿Qué tan alineados están tus gastos con lo que decís que valorás?",
+    "¿Cómo imaginás tu situación financiera en 10 años si seguís igual?",
+    "¿Qué significa el éxito económico para vos, más allá de los números?",
+    "¿Cuánto peso le das al dinero cuando tomás decisiones importantes?",
+    "¿Qué es lo primero que harías si de repente tuvieras mucho más dinero?",
+    "¿De qué manera la búsqueda de seguridad económica afecta tus elecciones de vida?",
+    "¿Cuándo te sentiste más tranquilo económicamente y qué tenía esa época que hoy no tiene?",
+    "¿Qué te enseñó el dinero sobre lo que realmente importa?",
+    "¿Cuánto espacio mental ocupa el dinero en tu vida diaria?",
+    "¿Qué parte de vos está atada a cuánto dinero tenés?",
+    "¿Cómo cambiaría tu vida si cambiaras tu forma de pensar sobre el dinero?",
+    "¿Qué valor le ponés al tiempo libre frente al dinero?",
+    "¿Cuándo fue la última vez que sentiste genuina gratitud por lo que tenés económicamente?",
+    "¿Qué harías con tu tiempo si el dinero no fuera un factor?",
+    "¿Cómo se relaciona tu autoestima con tu situación económica?",
+    "¿Qué decisión financiera de tu pasado todavía te pesa?",
+    "¿Cuánto de lo que gastás refleja quién querés ser?",
+    "¿Qué tema financiero evitás pensar y por qué?",
+    "¿Cuánto de tu felicidad está condicionada a tu situación económica?",
+    "¿Qué recursos no económicos tenés que aún no estás usando?",
+    "¿Cómo afecta tu relación con el dinero a las personas que te rodean?",
+    "¿Qué cambiaría en vos si no tuvieras preocupaciones económicas?",
+    "¿Qué pregunta sobre dinero te das cuenta de que nunca te hiciste?",
+  ],
+  "amigos": [
+    "¿Con quién podés ser completamente vos mismo sin filtros?",
+    "¿Cuántas de tus amistades son recíprocas en energía y cuidado?",
+    "¿Qué tipo de amigo sos vos para los demás?",
+    "¿Cuándo fue la última vez que te sentiste verdaderamente acompañado por un amigo?",
+    "¿Qué te impide iniciar nuevas amistades significativas?",
+    "¿Qué cualidad tuya aprecian más tus amigos?",
+    "¿Qué le dirías a alguien de quien te alejaste si tuvieras la oportunidad?",
+    "¿Cómo elegís a tus amigos y qué dice eso de lo que buscás en una relación?",
+    "¿Qué amistades te nutren y cuáles te agotan?",
+    "¿Cuándo fue la última vez que fuiste el primero en dar sin esperar nada a cambio?",
+    "¿Qué conversación importante todavía no tuviste con algún amigo?",
+    "¿Cómo sería tu vida si tuvieras más amistades profundas?",
+    "¿Qué miedos te impiden mostrarte vulnerable con tus amigos?",
+    "¿Cuánto de tu círculo social refleja quién sos realmente?",
+    "¿Qué aprendiste de una amistad que terminó?",
+    "¿De qué manera tus amistades influyen en quien te estás convirtiendo?",
+    "¿Cuándo fue la última vez que le dijiste a un amigo cuánto significa para vos?",
+    "¿Qué tipo de amistad extrañás tener?",
+    "¿Qué tan presente estás cuando estás con tus amigos?",
+    "¿Cómo describirías el tipo de amigo que querés ser?",
+    "¿Cuánto tiempo y energía le dedicás a tus amistades más importantes?",
+    "¿Qué patrón notás en cómo te relacionás con tus amigos?",
+    "¿Qué amistades dejaste ir y por qué?",
+    "¿Cuándo pediste ayuda a un amigo por última vez?",
+    "¿Qué cosas de vos mismo mostrás con tus amigos que no mostrás en otros lados?",
+    "¿Cómo afecta la distancia o el tiempo a tus amistades más importantes?",
+    "¿Qué necesitás de tus amigos que todavía no pediste?",
+    "¿De qué manera las redes sociales afectan tus amistades reales?",
+    "¿Cuándo fue la última vez que hiciste algo nuevo con un amigo?",
+    "¿Qué amistad de tu vida querés cuidar más?",
+    "¿Cómo cambian tus amistades a medida que cambiás vos?",
+    "¿Qué amigo te inspira más y por qué?",
+    "¿Cuánta intimidad emocional permitís en tus amistades?",
+    "¿Qué tan honesto sos con tus amigos sobre cómo te sentís realmente?",
+    "¿Cuándo fue la última vez que una amistad te sorprendió positivamente?",
+    "¿Qué rol solés ocupar en tu grupo de amigos?",
+    "¿Cómo te afecta el bienestar o el sufrimiento de tus amigos?",
+    "¿Qué clase de presencia querés ser en la vida de tus amigos?",
+    "¿Cuándo sentiste que una amistad te ayudó a ser mejor persona?",
+    "¿Qué amigo de tu infancia o pasado extrañás y por qué perdiste el contacto?",
+    "¿Cuánto de tu círculo social fue elegido y cuánto fue circunstancial?",
+    "¿Cómo te sentirías si tu mejor amigo describiera el tipo de amigo que sos?",
+    "¿Qué hacés cuando una amistad empieza a desequilibrarse?",
+    "¿Cuánta lealtad le pedís a tus amigos y cuánta ofrecés vos?",
+    "¿Qué lugar ocupa la amistad en tu escala de prioridades?",
+    "¿Cómo influye tu estado emocional en cómo te relacionás con tus amigos?",
+    "¿Qué amistades te acercan a la persona que querés ser?",
+    "¿Cuándo fue la última vez que priorizaste una amistad sobre otras cosas?",
+    "¿Qué querés construir con tus amistades en los próximos años?",
+    "¿Cuándo fue la última vez que una conversación con un amigo te cambió la perspectiva?",
+  ],
+  "salud": [
+    "¿Qué le diría tu cuerpo si pudiera hablarte directamente ahora mismo?",
+    "¿Qué hábito saludable seguís postergando y por qué?",
+    "¿Cómo se conectan tu estado emocional y tu salud física?",
+    "¿Qué cambio en tu rutina te daría más energía vital?",
+    "¿Cuándo fue la última vez que tu cuerpo se sintió verdaderamente bien?",
+    "¿Qué parte de tu cuidado personal estás descuidando más?",
+    "¿Qué emoción podría estar manifestándose en tu cuerpo como señal?",
+    "¿Qué significa para vos estar verdaderamente sano?",
+    "¿Cuánta atención le prestás a las señales que te da tu cuerpo?",
+    "¿Qué relación tenés con el descanso y el sueño?",
+    "¿De qué manera tu salud actual afecta tu calidad de vida?",
+    "¿Qué hábito incorporado en tu vida te está haciendo daño lentamente?",
+    "¿Qué cambio en tu alimentación te parece más urgente?",
+    "¿Cómo describirías tu relación con el movimiento y el ejercicio?",
+    "¿Qué miedos tenés alrededor de tu salud?",
+    "¿Cuánto tiempo le dedicás a tu salud mental en comparación con la física?",
+    "¿Qué cosas de tu estilo de vida cambiaste gracias a alguna experiencia de salud?",
+    "¿Cómo afecta tu salud a las personas que te rodean?",
+    "¿Qué parte de tu cuerpo sentís que necesita más atención?",
+    "¿Qué relación tenés con el dolor físico o el malestar?",
+    "¿Cómo influye tu salud en tu estado de ánimo diario?",
+    "¿Qué tanto te escuchás cuando tu cuerpo te pide parar?",
+    "¿Qué rutina de autocuidado querés construir y aún no empezaste?",
+    "¿Cuánta prioridad real tiene tu salud en tu vida cotidiana?",
+    "¿Qué cambio pequeño podrías hacer hoy que tendría gran impacto en tu salud?",
+    "¿Cómo usás el estrés en tu vida y qué hace con tu cuerpo?",
+    "¿Qué necesitás para sentirte con más energía en tu día a día?",
+    "¿De qué manera tu entorno afecta tu salud física y emocional?",
+    "¿Qué aprendiste sobre vos mismo en los momentos en que te sentiste mal de salud?",
+    "¿Qué creencias tenés sobre el cuidado personal que te limitan?",
+    "¿Cuánto de tu identidad está relacionada con ser saludable o no?",
+    "¿Cómo imaginas tu salud en 20 años si seguís igual?",
+    "¿Qué te impide priorizarte más?",
+    "¿Cuándo fue la última vez que moviste tu cuerpo de una manera que te generó placer?",
+    "¿Qué relación tenés con tus límites físicos?",
+    "¿Qué querés sentir en tu cuerpo que hoy no sentís?",
+    "¿Cómo afecta tu salud a la calidad de tus relaciones?",
+    "¿Cuándo decidiste empezar a cuidarte (o cuándo dejaste de hacerlo)?",
+    "¿Qué lugar le dás a la salud preventiva en tu vida?",
+    "¿Cómo definirías tu relación con tu cuerpo en una sola frase?",
+    "¿Qué parte de tu cuerpo nunca escuchás y qué estarías perdiendo?",
+    "¿Qué significa para vos cuidarte de verdad?",
+    "¿Cuánto de tu energía diaria está puesta en sostener a otros y cuánto en sostenerte a vos?",
+    "¿Qué harías diferente con tu salud si supieras que el tiempo es limitado?",
+    "¿Qué conexión hay entre tu salud y tu felicidad?",
+    "¿Cómo se relaciona tu nivel de estrés con los hábitos que tenés?",
+    "¿Qué tipo de movimiento o actividad física conecta mejor con tu forma de ser?",
+    "¿Cuándo fue la última vez que priorizaste tu descanso sobre tus obligaciones?",
+    "¿Qué pasaría en tu vida si empezaras a cuidarte realmente desde hoy?",
+    "¿Cuándo fue la última vez que chequeaste cómo te encontrás de manera integral?",
+  ],
+  "familia": [
+    "¿Qué patrón familiar te gustaría romper en esta generación?",
+    "¿Qué aprendiste de tu familia que más valoras de vos mismo hoy?",
+    "¿Cómo influyó tu familia en la persona que decidiste ser?",
+    "¿Qué parte de tu historia familiar necesitás sanar para avanzar?",
+    "¿Qué legado emocional estás construyendo en tu familia?",
+    "¿Cómo querés que te recuerden quienes vienen después de vos?",
+    "¿Qué conversación familiar importante todavía no tuviste?",
+    "¿Qué cosas de tu crianza replicas hoy sin haberte dado cuenta?",
+    "¿Cuándo fue la última vez que sentiste verdadera cercanía con alguien de tu familia?",
+    "¿Qué rol solés ocupar en tu dinámica familiar?",
+    "¿Qué aprendiste de tus padres que hoy te sirve y qué quisieras cambiar?",
+    "¿De qué manera tu familia te definió y en qué aspectos te redefiniste?",
+    "¿Qué necesitás de tu familia que nunca pediste?",
+    "¿Cómo afectan las expectativas familiares tus decisiones de vida?",
+    "¿Qué cosas de tu familia te generan orgullo?",
+    "¿Cuándo fue la última vez que expresaste amor o afecto hacia alguien de tu familia?",
+    "¿Qué límites necesitás establecer con tu familia para cuidarte?",
+    "¿Cómo sería tu vida si resolvieras el conflicto familiar más importante?",
+    "¿Qué cosas de tu infancia todavía influyen en cómo reaccionás hoy?",
+    "¿Cuánto de lo que sos hoy fue moldeado por tu historia familiar?",
+    "¿Qué es lo que más extrañás de tu familia?",
+    "¿Cómo describirías el ambiente emocional en el que creciste?",
+    "¿Qué le agradecerías a tu familia si pudieras hacerlo sin filtros?",
+    "¿Qué mandatos familiares seguís cargando aunque ya no te sirvan?",
+    "¿Cuánta libertad sentís para ser vos mismo dentro de tu familia?",
+    "¿Qué conflicto familiar has evitado resolver y qué costo tiene eso?",
+    "¿Cómo influyó la manera en que fuiste criado en tu relación con el amor?",
+    "¿Qué tipo de familia querés construir o sostener hacia adelante?",
+    "¿Cuándo fue la última vez que tu familia te sorprendió positivamente?",
+    "¿Qué heridas familiares todavía no sanaste?",
+    "¿De qué manera la familia en que creciste moldeó tu forma de relacionarte?",
+    "¿Qué es lo que más le querés dar a tu familia en esta etapa de tu vida?",
+    "¿Cuánto de la identidad de tu familia es tuya y cuánto te fue impuesta?",
+    "¿Cuándo sentiste que tu familia te vio como realmente sos?",
+    "¿Qué diferencias con tu familia has aprendido a aceptar?",
+    "¿Cómo te relacionás con el concepto de hogar?",
+    "¿Cuánto peso tiene la opinión de tu familia en las decisiones que tomás?",
+    "¿Qué querés sanar en tu historia familiar?",
+    "¿Cómo imaginás la relación con tu familia en 10 años?",
+    "¿Qué versión de vos mismo aparece cuando estás con tu familia?",
+    "¿Cuánto espacio ocupa la familia en tu vida emocional?",
+    "¿De qué manera la dinámica familiar de tu infancia se repite en tus relaciones actuales?",
+    "¿Cómo se expresa el amor en tu familia y cuánto se parece a lo que vos necesitás?",
+    "¿Qué querés transmitirle a las próximas generaciones de tu familia?",
+    "¿Qué parte de tu historia familiar todavía no te contaste a vos mismo?",
+    "¿Cuándo fue la última vez que priorizaste tiempo de calidad con tu familia?",
+    "¿Qué cosas no dichas con tu familia pesan en tu presente?",
+    "¿Qué pregunta sobre tu historia familiar llevás tiempo sin animarte a hacerte?",
+    "¿Cuándo fue la última vez que tu familia te dio una sorpresa genuina?",
+    "¿Qué parte de vos mismo guardás cuando estás con tu familia y por qué?",
+  ],
+  "pareja": [
+    "¿Qué necesitás de tu pareja que nunca has pedido directamente?",
+    "¿Cuándo fue la última vez que te sentiste verdaderamente visto y comprendido?",
+    "¿Qué versión de vos mismo emerge en tu relación?",
+    "¿Qué miedo subyace en los conflictos más repetidos de tu relación?",
+    "¿Qué cosa genuina le agradecés a tu pareja que nunca dijiste en voz alta?",
+    "¿Cuál es la diferencia entre lo que ofrecés y lo que realmente querés dar?",
+    "¿Qué conversación difícil has estado evitando tener?",
+    "¿De qué manera tu relación actual te invita a crecer?",
+    "¿Qué aprendiste de vos mismo a través de tu relación?",
+    "¿Cuándo fue la última vez que sorprendiste a tu pareja con algo genuino?",
+    "¿Qué parte de vos mismo querés recuperar dentro de la relación?",
+    "¿Cómo describirías el tipo de amor que querés dar y recibir?",
+    "¿Qué hábitos de tu relación construyen y cuáles destruyen?",
+    "¿De qué manera tu historia personal aparece en los conflictos de tu relación?",
+    "¿Cuánto espacio propio tenés dentro de tu relación?",
+    "¿Qué es lo que más valorás de tu pareja y cuánto se lo expresás?",
+    "¿Cómo se comunican en momentos de tensión y qué cambiarías?",
+    "¿Cuándo fue la última vez que se conectaron de manera profunda?",
+    "¿Qué tipo de pareja querés ser?",
+    "¿Qué roles asumís en la relación y cómo te sentís con ellos?",
+    "¿Cuánta confianza real hay en tu relación?",
+    "¿Qué expectativas tenés de tu pareja que nunca formulaste en palabras?",
+    "¿De qué manera el amor de tu infancia influye en cómo amás hoy?",
+    "¿Qué parte de la relación actual te hace sentir más vivo?",
+    "¿Cuándo fue la última vez que priorizaste la relación sobre lo urgente?",
+    "¿Qué cambiaría en tu relación si los dos hablaran con absoluta honestidad?",
+    "¿Cuánto de tu bienestar emocional depende de la relación y cuánto de vos mismo?",
+    "¿Qué cosas de tu pareja te generan admiración?",
+    "¿Cuándo sentiste que tu relación te limitaba y cuándo que te expandía?",
+    "¿Qué sueños compartís con tu pareja y cuánto los cultivan juntos?",
+    "¿De qué manera cuidan el vínculo en el día a día?",
+    "¿Qué parte de la relación dabas por sentado y ya no querés?",
+    "¿Cuánto de lo que sentís por tu pareja todavía es tu elección activa?",
+    "¿Qué necesitaría cambiar para que tu relación sea la que realmente querés?",
+    "¿Cómo describirías la dinámica de poder en tu relación?",
+    "¿Qué cosas de la relación alimentan tu autoestima y cuáles la lastiman?",
+    "¿Cuándo fue la última vez que tuvieron una conversación verdaderamente profunda?",
+    "¿Qué significa la intimidad para vos y cuánto de eso tenés en tu relación?",
+    "¿Cómo imaginás tu relación en 10 años si la cuidan activamente?",
+    "¿Qué parte de vos mismo escondés en la relación y por qué?",
+    "¿Cuánto de tu relación actual refleja lo que realmente querés?",
+    "¿Qué sacrificás en tu relación y qué ganás a cambio?",
+    "¿Cómo afecta la relación a tu sentido de identidad?",
+    "¿Qué aprendizaje querés integrar de las relaciones del pasado?",
+    "¿Cuándo te sentiste más libre dentro de una relación?",
+    "¿Qué cosas no dichas pesan en tu relación actualmente?",
+    "¿De qué manera la relación cambió quién sos?",
+    "¿Qué clase de compañero o compañera querés ser en los próximos años?",
+    "¿Qué pregunta sobre tu relación evitás hacerte porque la respuesta te incomoda?",
+    "¿Cuándo fue la última vez que hicieron algo completamente nuevo juntos?",
+  ],
+  "futuro": [
+    "¿Qué versión de vos mismo en 10 años te generaría más orgullo?",
+    "¿Qué sueño tuyo sigue vivo aunque hayas dejado de hablar de él?",
+    "¿Qué creencia sobre el futuro te genera más ansiedad?",
+    "¿Hacia dónde estás construyendo tu vida en este momento?",
+    "¿Cuál es el paso más pequeño que podrías dar mañana hacia el futuro que querés?",
+    "¿Qué sacrificarías hoy si garantizara el futuro que deseás?",
+    "¿Qué le dirías a la versión de vos mismo de dentro de 5 años?",
+    "¿Cuánto tiempo le dedicás a construir activamente el futuro que querés?",
+    "¿Qué es lo que más te asusta del futuro y de dónde viene ese miedo?",
+    "¿Cuándo fue la última vez que imaginaste tu futuro con entusiasmo genuino?",
+    "¿Qué futuro estás evitando imaginar porque te parece imposible?",
+    "¿Cómo describirías tu vida ideal en 15 años?",
+    "¿Qué decisiones del presente están moldeando tu futuro sin que lo notes?",
+    "¿Cuánto de tu energía va hacia el futuro y cuánto queda atrapado en el pasado?",
+    "¿Qué parte de tu futuro está en tus manos y qué no lo está?",
+    "¿Qué tendrías que dejar ir para construir el futuro que realmente querés?",
+    "¿Cómo imaginarías tu vida si no tuvieras miedo al fracaso?",
+    "¿Qué sueño de infancia todavía aparece cuando pensás en el futuro?",
+    "¿Cuánto de tu futuro imaginado está basado en lo que vos querés versus lo que otros esperan?",
+    "¿Qué cambio en tu estilo de vida actual te acercaría más al futuro que soñás?",
+    "¿Cuándo fue la última vez que tomaste una decisión pensando en tu futuro a largo plazo?",
+    "¿Qué legado querés dejar cuando ya no estés?",
+    "¿Cuánto de tu bienestar futuro estás construyendo hoy?",
+    "¿Qué cosas de tu presente querés que sigan estando en tu futuro?",
+    "¿Cuándo empezaste a dejar de creer en ciertos futuros posibles?",
+    "¿Qué oportunidades futuras te da miedo aprovechar?",
+    "¿De qué manera tus hábitos actuales te acercan o alejan del futuro que querés?",
+    "¿Qué imagen de tu futuro te genera más paz?",
+    "¿Qué recursos, habilidades o relaciones necesitás cultivar para el futuro que imaginás?",
+    "¿Cuánto de tu futuro depende de cambios externos y cuánto de decisiones internas?",
+    "¿Qué conversación pendiente cambiaría tu rumbo futuro?",
+    "¿Cuándo te permitiste por última vez soñar en grande sin censura?",
+    "¿Qué versión del futuro te da más miedo y cuál te da más esperanza?",
+    "¿De qué manera la incertidumbre del futuro afecta tus decisiones del presente?",
+    "¿Qué tan coherentes son tus acciones de hoy con el futuro que decís querer?",
+    "¿Cuándo fue la última vez que apostaste por vos mismo de cara al futuro?",
+    "¿Qué aspectos de tu futuro has dejado en manos del azar o la suerte?",
+    "¿Qué querés que sea diferente en tu vida dentro de un año?",
+    "¿Cuánto de tu presente estás sacrificando por un futuro incierto?",
+    "¿Qué necesitás resolver del pasado para liberar energía hacia el futuro?",
+    "¿Cuándo empezaste a vivir con un horizonte de tiempo más corto?",
+    "¿Qué futuro alternativo te imaginás que nunca elegiste?",
+    "¿Qué te daría más claridad sobre el camino que querés seguir?",
+    "¿Cómo imaginás tu vida emocional en el futuro que construís hoy?",
+    "¿Qué querés aprender todavía y para qué futuro?",
+    "¿Cuánta esperanza tenés en el futuro y de dónde viene esa sensación?",
+    "¿Qué parte de tu futuro todavía depende de que otros te den permiso?",
+    "¿Qué miedo específico al futuro estarías dispuesto a enfrentar?",
+    "¿Qué pregunta sobre tu futuro llevás tiempo sin querer responderte?",
+    "¿Cuándo fue la última vez que visualizaste con claridad adónde querés llegar?",
+  ],
+  "proyecciones": [
+    "¿Cuál es la diferencia entre tus metas declaradas y las que realmente perseguís?",
+    "¿Qué proyecto llevas tiempo postergando?",
+    "¿De qué manera tus objetivos actuales responden a tus valores?",
+    "¿Qué pequeña victoria reciente no celebraste lo suficiente?",
+    "¿Qué obstáculo interno te frena más que cualquier obstáculo externo?",
+    "¿Cuándo fue la última vez que revisaste si tus metas siguen siendo las que querés?",
+    "¿Cómo medís el éxito y es esa la medida correcta para vos?",
+    "¿Cuánto de tus proyectos actuales vienen de lo que genuinamente querés?",
+    "¿Cuándo fue la última vez que cumpliste una meta importante y cómo lo celebraste?",
+    "¿Qué proyecto te genera más entusiasmo y cuánto tiempo le dedicás?",
+    "¿Qué harías si supieras que no podés fallar?",
+    "¿Cuánto de tu agenda diaria está alineada con tus metas a largo plazo?",
+    "¿Qué meta sigue apareciendo en tu vida aunque no la hayas perseguido?",
+    "¿De qué manera el miedo al fracaso afecta las metas que te ponés?",
+    "¿Qué proyectos iniciaste pero nunca terminaste y qué dice eso?",
+    "¿Cuánto de tu energía va hacia cosas que realmente importan?",
+    "¿Qué proyección de tu vida te genera más entusiasmo cuando la imaginás?",
+    "¿Cómo priorizás entre diferentes metas cuando entran en conflicto?",
+    "¿Cuánto de tus metas son tuyas y cuánto son de otros?",
+    "¿Qué hábito o rutina aceleraría el logro de lo que más querés?",
+    "¿Cuándo empezaste a pensar en grande y cuándo dejaste de hacerlo?",
+    "¿Qué meta te pondrías si no te importara la opinión de los demás?",
+    "¿De qué manera tus proyecciones actuales te definen como persona?",
+    "¿Cuánto tiempo libre tenés para pensar en el largo plazo?",
+    "¿Qué recursos ya tenés que no estás usando para avanzar?",
+    "¿Qué tipo de ayuda necesitás para llegar adonde querés?",
+    "¿Cuándo fue la última vez que empezaste algo desde cero?",
+    "¿Qué aspecto de tu vida tiene más potencial sin explotar?",
+    "¿Cómo imaginás tu vida si lograras lo que más querés?",
+    "¿Qué aprendiste de los proyectos que no resultaron como esperabas?",
+    "¿De qué manera la distracción afecta el avance hacia tus metas?",
+    "¿Cuánto de tu presente estás dispuesto a invertir en tu futuro?",
+    "¿Qué proyección de vida requiere más valentía de tu parte?",
+    "¿Cuándo fue la última vez que saliste de tu zona de confort para avanzar?",
+    "¿Qué meta te cambiaría la vida si la lograras en el próximo año?",
+    "¿De qué manera tus proyecciones cambian en función de tus miedos?",
+    "¿Qué tanto confiás en tu capacidad de lograr lo que te proponés?",
+    "¿Cuánto de tu identidad está ligada a lograr determinadas metas?",
+    "¿Qué pasaría si renunciaras a una meta que en realidad no querés?",
+    "¿Cuándo empezaste a creer (o dejar de creer) que podías lograr lo que te proponés?",
+    "¿Qué tanto impacto tienen las personas cercanas en las metas que elegís?",
+    "¿Qué paso concreto hacia tus metas has evitado dar?",
+    "¿De qué manera le rendís cuentas a vos mismo?",
+    "¿Qué tan dispuesto estás a cambiar de rumbo si algo no funciona?",
+    "¿Cómo afecta la comparación con otros tus propias proyecciones?",
+    "¿Qué proyección de vida abandonaste y todavía extrañás?",
+    "¿Cuánto de tus metas actuales surgieron de tus deseos y cuántas del miedo?",
+    "¿Qué pregunta sobre tus proyecciones nunca te hiciste y deberías hacerte?",
+    "¿Cuándo fue la última vez que evaluaste si tus proyecciones siguen siendo relevantes?",
+    "¿Qué pasaría si lograras todo lo que te propusiste y aun así no te sintieras satisfecho?",
+  ],
+  "desarrollo-personal": [
+    "¿Quién eras hace 5 años y qué cambió en vos desde entonces?",
+    "¿Qué parte de vos mismo todavía no te animás a explorar?",
+    "¿Cuál es el patrón que más te ha frenado en la vida?",
+    "¿Qué creencia sobre vos mismo ya no te sirve?",
+    "¿Qué haría la mejor versión de vos mismo en este momento?",
+    "¿Qué emoción evitás sentir y qué costo tiene eso?",
+    "¿Cuándo fue la última vez que saliste genuinamente de tu zona de confort?",
+    "¿Qué libro, experiencia o conversación te cambió profundamente?",
+    "¿Qué aspecto de vos mismo aceptás menos?",
+    "¿Hacia dónde estás creciendo y hacia dónde no?",
+    "¿Qué cosa de vos mismo le ocultás al mundo y por qué?",
+    "¿Cuándo fue la última vez que te sorprendiste a vos mismo positivamente?",
+    "¿Qué parte de tu pasado todavía pesa en tu presente?",
+    "¿Cuánto de lo que hacés viene de tus valores y cuánto del miedo a decepcionar?",
+    "¿Qué significaría para vos llegar a ser la persona que realmente querés ser?",
+    "¿Cuándo te sentiste más auténtico y qué lo hacía posible?",
+    "¿Qué limitación propia has convertido en una fortaleza?",
+    "¿Cuánto espacio le das a la reflexión en tu vida cotidiana?",
+    "¿Qué cosas te generan vergüenza y qué dicen de lo que valorás?",
+    "¿Cuándo fue la última vez que pediste ayuda para crecer?",
+    "¿Qué versión de vos mismo querés cultivar en los próximos años?",
+    "¿Cuánto de lo que pensás sobre vos mismo es realmente tuyo?",
+    "¿Qué aprendiste de tus momentos más difíciles?",
+    "¿Cuándo dejaste de creer en algo de vos mismo y qué pasó?",
+    "¿Qué parte de tu historia te define y cuál elegís dejar atrás?",
+    "¿Cuánto de tu energía va hacia crecer y cuánto hacia sobrevivir?",
+    "¿Qué cosas de vos mismo tus seres queridos ven y vos no ves?",
+    "¿Cuándo fue la última vez que te sentiste verdaderamente orgulloso de quién sos?",
+    "¿Qué tipo de persona querés ser en las relaciones que importan?",
+    "¿Cuánto de tu crecimiento personal es consciente y cuánto ocurre sin planificación?",
+    "¿Qué miedos han moldeado más tu personalidad?",
+    "¿Cuándo empezaste a ponerte límites a vos mismo?",
+    "¿Qué parte de tu potencial todavía no exploraste?",
+    "¿Cuánto de tu desarrollo personal está motivado por el amor propio y cuánto por la inseguridad?",
+    "¿Qué aprendizaje de este año te cambió la perspectiva?",
+    "¿Cuándo fue la última vez que cuestionaste una creencia que dabas por verdad?",
+    "¿Qué parte de tu pasado todavía te influye más de lo que reconocés?",
+    "¿De qué manera te tratás a vos mismo cuando fallás?",
+    "¿Qué cosa de vos mismo requiere más compasión de tu parte?",
+    "¿Cuándo fue la última vez que priorizaste tu crecimiento personal sobre la comodidad?",
+    "¿Qué aspectos de tu carácter te gustaría transformar?",
+    "¿Cuánto de lo que sos hoy es una respuesta a lo que viviste?",
+    "¿Qué relación tenés con la soledad y qué te enseña sobre vos mismo?",
+    "¿Cuándo te escuchás de verdad y cuándo te ignorás?",
+    "¿Qué valores tuyos nunca comprometiste y cuáles sí?",
+    "¿De qué manera tu diálogo interno afecta tus acciones?",
+    "¿Qué significaría para vos vivir una vida más auténtica?",
+    "¿Cuándo fue la última vez que te hiciste una pregunta que te incomodó genuinamente?",
+    "¿Qué pregunta sobre vos mismo llevás tiempo evitando responderte?",
+    "¿Cuándo fue la última vez que elegiste crecer en lugar de quedarte cómodo?",
+  ],
+  "desarrollo-profesional": [
+    "¿Qué habilidad, si la desarrollaras, transformaría completamente tu carrera?",
+    "¿Cuánto estás aprendiendo en tu trabajo actual?",
+    "¿A quién admirás profesionalmente y qué cualidad específica de esa persona querés cultivar?",
+    "¿Qué feedback recurrente recibiste y nunca terminaste de integrar?",
+    "¿Cuánto refleja tu red de contactos el nivel al que querés llegar?",
+    "¿Qué área de tu profesión evitás por inseguridad?",
+    "¿Cuál fue tu mayor aprendizaje de un fracaso profesional?",
+    "¿Cuándo fue la última vez que te sentiste genuinamente desafiado en tu trabajo?",
+    "¿Qué reputación profesional querés tener?",
+    "¿Cuánto de tu desarrollo profesional es consciente y deliberado?",
+    "¿Qué tipo de mentor o referente necesitás en esta etapa?",
+    "¿Cuándo fue la última vez que aprendiste algo completamente nuevo para tu carrera?",
+    "¿Qué oportunidades de desarrollo estás dejando pasar?",
+    "¿Cómo describirías tu marca profesional personal?",
+    "¿Cuánto tiempo le dedicás a tu desarrollo profesional fuera del horario laboral?",
+    "¿Qué habilidad blanda necesitás desarrollar más urgentemente?",
+    "¿De qué manera tu historia personal afecta tu desempeño profesional?",
+    "¿Cuándo fue la última vez que pediste retroalimentación genuina sobre tu trabajo?",
+    "¿Qué tipo de proyectos hacen que lo mejor de vos aparezca?",
+    "¿Cuánto de tu energía laboral va hacia crecer y cuánto hacia mantener?",
+    "¿Qué conversación profesional importante has evitado?",
+    "¿Cuándo empezaste a sentirte cómodo (o incómodo) en tu rol actual?",
+    "¿Qué carrera alternativa te imaginás si empezaras de cero?",
+    "¿Cuánto de tu potencial profesional ya estás usando?",
+    "¿Qué necesitás para dar el siguiente paso en tu carrera?",
+    "¿Cuándo fue la última vez que tomaste un riesgo profesional calculado?",
+    "¿De qué manera tu entorno profesional te impulsa o te frena?",
+    "¿Qué aprendizaje estás postergando que sería clave para tu carrera?",
+    "¿Cómo describirías tu relación con el crecimiento profesional continuo?",
+    "¿Cuánto de tu trabajo refleja tu máximo potencial?",
+    "¿Qué parte de tu desempeño profesional te genera más orgullo?",
+    "¿Cuándo fue la última vez que saliste de tu zona de confort profesional?",
+    "¿Qué tipo de impacto querés tener en tu industria o campo?",
+    "¿Cuánto de lo que hacés hoy es relevante para el profesional que querés ser mañana?",
+    "¿Qué errores profesionales del pasado todavía te pesan?",
+    "¿De qué manera tu desarrollo profesional afecta otras áreas de tu vida?",
+    "¿Qué tipo de trabajo te haría dar lo mejor de vos mismo?",
+    "¿Cuándo fue la última vez que te posicionaste activamente para avanzar?",
+    "¿Qué hábitos de aprendizaje querés desarrollar?",
+    "¿Cuánto de tu carrera fue planificada y cuánto fue circunstancial?",
+    "¿Qué te impide mostrarte más en tu ámbito profesional?",
+    "¿Cuándo te sentiste más competente en tu trabajo y qué lo generó?",
+    "¿Qué cambiaría en tu carrera si te convirtieras en la persona que querés ser?",
+    "¿Cuánto de tu desarrollo depende de las oportunidades que esperás y cuánto de las que creás?",
+    "¿Qué estás dispuesto a invertir en tu crecimiento profesional?",
+    "¿De qué manera el reconocimiento (o la falta de él) afecta tu motivación?",
+    "¿Qué tan alineado está tu desarrollo profesional con tu propósito de vida?",
+    "¿Qué cosa nueva querés aprender este año y por qué esa específicamente?",
+    "¿Cuándo sentiste que llegaste a un techo y cómo lo atravesaste (o no)?",
+    "¿Qué pregunta sobre tu carrera profesional llevás tiempo sin querer responder?",
+  ],
+  "naturaleza": [
+    "¿Cuándo fue la última vez que te detuviste realmente a observar el mundo natural?",
+    "¿Qué te transmite la naturaleza que las personas o el trabajo no pueden darte?",
+    "¿Cómo sería tu vida si pasaras más tiempo al aire libre?",
+    "¿Qué elemento natural (agua, tierra, viento, fuego) te conecta más con vos mismo?",
+    "¿Qué lugar en la naturaleza sentís como propio?",
+    "¿Qué impacto tiene tu vida diaria en el mundo natural que te rodea?",
+    "¿Qué emociones emergen en vos cuando estás en contacto con la naturaleza?",
+    "¿Cuándo fue la última vez que simplemente exististe sin hacer nada en la naturaleza?",
+    "¿Qué aprendizaje de la naturaleza podés aplicar a tu vida cotidiana?",
+    "¿Cómo cambia tu perspectiva cuando te detenés ante algo vasto, como el mar o una montaña?",
+    "¿Qué relación tenés con el silencio y la quietud de la naturaleza?",
+    "¿Cuándo fue la última vez que saliste de la ciudad para conectarte con algo más amplio?",
+    "¿De qué manera el ritmo de la naturaleza contrasta con el ritmo de tu vida?",
+    "¿Qué sensación te genera la lluvia, el viento, el sol?",
+    "¿Cómo te relacionás con los ciclos naturales: el cambio de estaciones, el día y la noche?",
+    "¿Qué lugar natural de tu infancia recordás con más intensidad?",
+    "¿Cuánto tiempo al aire libre considerás suficiente para vos?",
+    "¿De qué manera la naturaleza cambia tu estado de ánimo?",
+    "¿Qué aspecto del mundo natural te genera más asombro?",
+    "¿Cuándo fue la última vez que te llenaste de energía gracias al contacto con la naturaleza?",
+    "¿Qué animal te representa y por qué?",
+    "¿Cuánto de la naturaleza tenés incorporada en tu vida cotidiana?",
+    "¿Qué cambio en tu rutina te permitiría conectarte más con el entorno natural?",
+    "¿Cuándo sentiste por última vez que formás parte de algo más grande que vos?",
+    "¿Qué hace la naturaleza con tu ansiedad o tus preocupaciones?",
+    "¿Cómo sería tu vida si vivieras más cerca de la naturaleza?",
+    "¿Qué relación tenés con el cuerpo de agua más cercano a vos?",
+    "¿Cuándo fue la última vez que observaste el cielo nocturno en silencio?",
+    "¿Qué te enseña la naturaleza sobre la impermanencia y el cambio?",
+    "¿De qué manera cuidás el entorno natural en el que vivís?",
+    "¿Qué sonidos de la naturaleza te generan más paz?",
+    "¿Cuándo fue la última vez que exploraste un lugar natural nuevo?",
+    "¿Qué te da la soledad en la naturaleza que no encontrás en otro lado?",
+    "¿Cómo te afecta estar rodeado de tecnología y concreto por largos períodos?",
+    "¿Qué tradición o práctica vinculada a la naturaleza te gustaría recuperar?",
+    "¿De qué manera la naturaleza te ayuda a procesar emociones difíciles?",
+    "¿Cuánto del cuidado del planeta entra en tus decisiones cotidianas?",
+    "¿Qué te impide pasar más tiempo en contacto con la naturaleza?",
+    "¿Cuándo te sentiste más pequeño frente a la naturaleza y qué te generó eso?",
+    "¿Qué aspectos del mundo natural te dan esperanza?",
+    "¿Cuándo fue la última vez que plantaste o cuidaste algo que creció?",
+    "¿Qué diferencia notás en vos cuando pasaste tiempo en la naturaleza versus cuando no lo hiciste?",
+    "¿De qué manera la naturaleza forma parte de tus recuerdos más significativos?",
+    "¿Qué tipo de entorno natural te hace sentir más vos mismo?",
+    "¿Cuándo fue la última vez que te dejaste sorprender por algo del mundo natural?",
+    "¿Qué tan consciente sos del entorno natural cuando caminás por la ciudad?",
+    "¿Qué relación querés construir con la naturaleza en los próximos años?",
+    "¿Cómo cambia tu respiración cuando estás en un espacio natural abierto?",
+    "¿Qué te recuerda la naturaleza sobre lo que realmente importa?",
+    "¿Qué conversación interna tenés cuando estás solo en la naturaleza?",
+  ],
+  "espiritualidad": [
+    "¿Qué le da sentido profundo a tu existencia más allá de lo material?",
+    "¿En qué momentos sentís que estás conectado con algo más grande que vos mismo?",
+    "¿Cuál es tu relación con lo desconocido y con la incertidumbre?",
+    "¿Qué prácticas o rituales te ayudan a reencontrarte con vos mismo?",
+    "¿Cómo te relacionás con la idea de que hay cosas fuera de tu control?",
+    "¿Qué te da paz interior cuando todo lo externo falla?",
+    "¿Qué preguntas existenciales evitás porque las respuestas te incomodan?",
+    "¿Qué rol juega la gratitud en tu vida cotidiana?",
+    "¿Cómo definirías tu propósito de vida?",
+    "¿Qué es lo que más te cuesta soltar?",
+    "¿Cuándo sentiste por primera vez algo que no podías explicar racionalmente?",
+    "¿Qué relación tenés con la idea de la muerte?",
+    "¿De qué manera tu vida cotidiana refleja tus valores más profundos?",
+    "¿Cuándo fue la última vez que te sentiste completamente presente en un momento?",
+    "¿Qué significaría para vos vivir una vida con propósito?",
+    "¿Cuánto de tu vida está guiado por el miedo y cuánto por la fe (en cualquier sentido)?",
+    "¿Qué te conecta con algo mayor que vos mismo?",
+    "¿De qué manera el sufrimiento que viviste te cambió?",
+    "¿Cuándo fue la última vez que te sentiste en paz profunda?",
+    "¿Qué prácticas espirituales o de introspección tenés?",
+    "¿Cómo te relacionás con la idea del perdón?",
+    "¿Qué creencias sobre la vida sostienen tu forma de actuar?",
+    "¿Cuándo sentiste que algo más grande que vos te guiaba?",
+    "¿Qué tradición espiritual o filosófica te resuena y por qué?",
+    "¿Cómo te relacionás con el silencio interior?",
+    "¿Cuándo fue la última vez que experimentaste un momento de genuina gratitud?",
+    "¿Qué parte de tu vida te parece más llena de sentido?",
+    "¿Cuándo empezaste a hacerte preguntas sobre el sentido de la vida?",
+    "¿Qué significa para vos la conexión con los demás a un nivel más profundo?",
+    "¿Cuánto de tu vida está alineado con lo que sentís que es tu propósito?",
+    "¿Qué te resulta sagrado en tu vida cotidiana?",
+    "¿De qué manera la espiritualidad (o la falta de ella) afecta tus relaciones?",
+    "¿Cuándo fue la última vez que actuaste desde el amor y no desde el miedo?",
+    "¿Qué te enseñaron las crisis sobre lo que realmente importa?",
+    "¿Cuándo te sentiste por última vez verdaderamente vivo?",
+    "¿Qué relación tenés con la idea del alma o el ser interior?",
+    "¿De qué manera la belleza del mundo te toca espiritualmente?",
+    "¿Cuándo fue la última vez que te sentiste parte de algo más grande?",
+    "¿Qué preguntas sobre la vida deberías hacerte y nunca te hacés?",
+    "¿Cómo te relacionás con la idea de la causa y el efecto en tu vida?",
+    "¿Qué legado espiritual querés dejar?",
+    "¿De qué manera el amor (en todas sus formas) orienta tus decisiones?",
+    "¿Cuándo sentiste que tus acciones estaban alineadas con tus valores más profundos?",
+    "¿Qué tipo de vida espiritual querés cultivar en esta etapa?",
+    "¿Cuánto de tu bienestar proviene de fuentes internas y cuánto de externas?",
+    "¿Qué pregunta espiritual o filosófica te cambia cada vez que la pensás?",
+    "¿Cuándo fue la última vez que te sentiste profundamente conectado con otro ser humano?",
+    "¿Qué significa para vos vivir de manera más consciente?",
+    "¿Qué pregunta sobre el sentido de tu existencia llevás más tiempo sin responder?",
+    "¿Cuándo fue la última vez que algo ordinario te llenó de asombro?",
+  ],
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+
+let currentAspect = null;
+
+// ── History (7-day retention) ─────────────────────────────────────────────────
+
+const HISTORY_KEY  = "desde-adentro-history";
+const SEVEN_DAYS   = 7 * 24 * 60 * 60 * 1000;
+
+function getAllHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "{}"); }
+  catch { return {}; }
+}
+
+function saveAllHistory(store) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(store));
+}
+
+function pruneOld(entries) {
+  const cutoff = Date.now() - SEVEN_DAYS;
+  return entries.filter(e => new Date(e.timestamp).getTime() > cutoff);
+}
+
+function getHistory(slug) {
+  const store = getAllHistory();
+  return pruneOld(store[slug] || []);
+}
+
+function addToHistory(slug, question) {
+  const store = getAllHistory();
+  const entries = pruneOld(store[slug] || []);
+  if (entries.some(e => e.question === question)) return;
+  entries.unshift({ question, timestamp: new Date().toISOString() });
+  store[slug] = entries;
+  saveAllHistory(store);
+}
+
+function getSeenQuestions(slug) {
+  return getHistory(slug).map(e => e.question);
+}
+
+// ── Questions ─────────────────────────────────────────────────────────────────
+
+function getRandomQuestion(slug, used) {
+  const pool = QUESTIONS[slug] || [];
+  const available = pool.filter(q => !used.includes(q));
+  if (!available.length) return null;
+  return available[Math.floor(Math.random() * available.length)];
+}
+
+// ── UI ────────────────────────────────────────────────────────────────────────
+
+function showView(name) {
+  document.getElementById("view-home").style.display   = name === "home"   ? "block" : "none";
+  document.getElementById("view-aspect").style.display = name === "aspect" ? "block" : "none";
+}
+
+function animateQuestion(text) {
+  const wrap = document.querySelector(".question-wrap");
+  const el   = document.getElementById("question-text");
+  el.textContent = "\u201C" + text + "\u201D";
+  wrap.classList.remove("fade-in");
+  void wrap.offsetWidth;
+  wrap.classList.add("fade-in");
+}
+
+function setQuestion(text) {
+  animateQuestion(text);
+
+  const badge = document.getElementById("aspect-badge");
+  badge.innerHTML = `<span>${currentAspect.icon}</span><span>${currentAspect.name}</span>`;
+  badge.style.background = currentAspect.light;
+  badge.style.color       = currentAspect.accent;
+
+  document.getElementById("divider").style.background = currentAspect.accent;
+}
+
+function renderHistory() {
+  const list    = document.getElementById("history-list");
+  const entries = getHistory(currentAspect.slug);
+  if (!entries.length) {
+    list.innerHTML = `<div class="history-empty">Todavía no hay preguntas en el historial.</div>`;
+    return;
+  }
+  list.innerHTML = entries.map(e => {
+    const d    = new Date(e.timestamp);
+    const date = d.toLocaleDateString("es-AR", { day:"numeric", month:"short", year:"numeric" });
+    return `<div class="history-item">
+      <p class="history-q">${e.question}</p>
+      <div class="history-meta"><span class="history-date">${date}</span></div>
+    </div>`;
+  }).join("");
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+
+function goHome() {
+  showView("home");
+  document.getElementById("header-sub").style.display = "";
+  currentAspect = null;
+  window.scrollTo(0, 0);
+}
+
+function goAspect(aspect) {
+  currentAspect = aspect;
+  document.getElementById("header-sub").style.display = "none";
+
+  const seen = getSeenQuestions(aspect.slug);
+  const q    = getRandomQuestion(aspect.slug, seen) || QUESTIONS[aspect.slug][0];
+  setQuestion(q);
+  addToHistory(aspect.slug, q);
+
+  // Reset next button
+  const btn = document.getElementById("btn-next");
+  btn.disabled    = false;
+  btn.textContent = "Otra pregunta";
+
+  // Reset history panel
+  document.getElementById("history-list").classList.remove("open");
+  document.getElementById("history-chevron").classList.remove("open");
+
+  showView("aspect");
+  window.scrollTo(0, 0);
+}
+
+// ── Build home grid ───────────────────────────────────────────────────────────
+
+function buildGrid() {
+  const grid = document.getElementById("aspect-grid");
+  grid.innerHTML = ASPECTS.map(a => `
+    <div class="card" data-slug="${a.slug}" tabindex="0" role="button" aria-label="${a.name}">
+      <div class="card-icon" style="background:${a.light}">${a.icon}</div>
+      <div>
+        <p class="card-name">${a.name}</p>
+        <p class="card-desc">${a.desc}</p>
+      </div>
+      <div class="card-bar" style="background:${a.accent}"></div>
+    </div>
+  `).join("");
+
+  grid.querySelectorAll(".card").forEach(card => {
+    const onClick = () => {
+      const aspect = ASPECTS.find(a => a.slug === card.dataset.slug);
+      if (aspect) goAspect(aspect);
+    };
+    card.addEventListener("click", onClick);
+    card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") onClick(); });
+  });
+}
+
+// ── Event listeners ───────────────────────────────────────────────────────────
+
+document.getElementById("logo-btn").addEventListener("click", goHome);
+document.getElementById("btn-back").addEventListener("click", goHome);
+
+document.getElementById("btn-next").addEventListener("click", () => {
+  if (!currentAspect) return;
+  const seen = getSeenQuestions(currentAspect.slug);
+  const next = getRandomQuestion(currentAspect.slug, seen);
+  if (!next) {
+    const btn = document.getElementById("btn-next");
+    btn.disabled    = true;
+    btn.textContent = "Volvé en 7 días para más preguntas";
+    return;
+  }
+  setQuestion(next);
+  addToHistory(currentAspect.slug, next);
+});
+
+document.getElementById("history-toggle").addEventListener("click", () => {
+  const list    = document.getElementById("history-list");
+  const chevron = document.getElementById("history-chevron");
+  const isOpen  = list.classList.toggle("open");
+  chevron.classList.toggle("open", isOpen);
+  if (isOpen) renderHistory();
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+buildGrid();
+showView("home");
+</script>
+</body>
+</html>
