@@ -9,26 +9,12 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: "Respuesta muy corta" });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: "Configuración incompleta" });
   }
 
-  try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 200,
-        messages: [
-          {
-            role: "user",
-            content: `Sos un coach de desarrollo personal que hace preguntas poderosas de reflexión.
+  const prompt = `Sos un coach de desarrollo personal que hace preguntas poderosas de reflexión.
 
 Ámbito: "${aspect}"
 Pregunta que recibió: "${question}"
@@ -40,18 +26,27 @@ Generá una única pregunta de seguimiento que:
 - Sea breve (máximo 25 palabras)
 - Invite a seguir mirando hacia adentro
 
-Respondé solo con la pregunta, sin comillas ni explicaciones.`,
-          },
-        ],
-      }),
-    });
+Respondé solo con la pregunta, sin comillas ni explicaciones.`;
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 200 },
+        }),
+      }
+    );
 
     if (!response.ok) {
-      throw new Error("Error en la API de Claude");
+      throw new Error("Error en la API de Gemini");
     }
 
     const data = await response.json();
-    const followupQuestion = data.content[0].text.trim();
+    const followupQuestion = data.candidates[0].content.parts[0].text.trim();
 
     return res.status(200).json({ question: followupQuestion });
   } catch {
