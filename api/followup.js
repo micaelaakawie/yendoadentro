@@ -1,20 +1,24 @@
 module.exports = async (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método no permitido" });
   }
 
-  const { aspect, question, userResponse } = req.body;
+  try {
+    const body = req.body || {};
+    const { aspect, question, userResponse } = body;
 
-  if (!userResponse || userResponse.trim().length < 5) {
-    return res.status(400).json({ error: "Respuesta muy corta" });
-  }
+    if (!userResponse || String(userResponse).trim().length < 5) {
+      return res.status(400).json({ error: "Respuesta muy corta" });
+    }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: "Configuración incompleta" });
-  }
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: "Falta la variable GEMINI_API_KEY en Vercel" });
+    }
 
-  const prompt = `Sos un coach de desarrollo personal que hace preguntas poderosas de reflexión.
+    const prompt = `Sos un coach de desarrollo personal que hace preguntas poderosas de reflexión.
 
 Ámbito: "${aspect}"
 Pregunta que recibió: "${question}"
@@ -28,9 +32,8 @@ Generá una única pregunta de seguimiento que:
 
 Respondé solo con la pregunta, sin comillas ni explicaciones.`;
 
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -41,15 +44,23 @@ Respondé solo con la pregunta, sin comillas ni explicaciones.`;
       }
     );
 
-    if (!response.ok) {
-      throw new Error("Error en la API de Gemini");
+    const data = await geminiRes.json();
+
+    if (!geminiRes.ok) {
+      return res.status(500).json({
+        error: `Error de Gemini: ${data?.error?.message || geminiRes.status}`,
+      });
     }
 
-    const data = await response.json();
-    const followupQuestion = data.candidates[0].content.parts[0].text.trim();
+    const followupQuestion = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+    if (!followupQuestion) {
+      return res.status(500).json({ error: "Gemini no devolvió una pregunta. Intentá de nuevo." });
+    }
 
     return res.status(200).json({ question: followupQuestion });
-  } catch {
-    return res.status(500).json({ error: "No pudimos generar la pregunta. Intentá de nuevo." });
+
+  } catch (err) {
+    return res.status(500).json({ error: `Error interno: ${err.message}` });
   }
 };
