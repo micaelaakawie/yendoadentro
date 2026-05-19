@@ -344,6 +344,70 @@
     }
     .footer-icons svg { width: 17px; height: 17px; }
 
+    /* ── Response area ── */
+    .response-wrap {
+      width: 100%; max-width: 560px;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      display: flex; flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .response-header {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .response-header-icon {
+      font-size: 15px; line-height: 1;
+    }
+    .response-header-text {
+      font-size: 13px; font-weight: 600; color: var(--fg);
+    }
+    .response-label {
+      font-size: 12px; color: #a8a29e;
+    }
+    .response-label.ai-badge {
+      color: var(--yellow-dark);
+      font-weight: 600;
+    }
+    .response-textarea {
+      width: 100%;
+      min-height: 130px;
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 14px; line-height: 1.75;
+      color: var(--fg);
+      resize: vertical;
+      transition: border-color 0.2s, background 0.2s;
+      outline: none;
+    }
+    .response-textarea::placeholder { color: #bbb8b4; }
+    .response-textarea:focus {
+      border-color: #aaa;
+      background: var(--white);
+    }
+    .response-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px;
+    }
+    .btn-followup {
+      background: var(--fg);
+      border: 1.5px solid var(--fg);
+      color: var(--white);
+      border-radius: 999px;
+      padding: 10px 22px;
+      font-size: 13px; font-weight: 600;
+      font-family: inherit; cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+      white-space: nowrap;
+    }
+    .btn-followup:hover:not(:disabled) { background: #333; border-color: #333; }
+    .btn-followup:disabled { opacity: 0.3; cursor: not-allowed; }
+
     /* ── Animations ── */
     .fade-in {
       animation: fadeIn 0.4s ease;
@@ -391,6 +455,18 @@
       <p class="question-text" id="question-text"></p>
     </div>
     <div class="divider" id="divider"></div>
+    <div class="response-wrap" id="response-wrap">
+      <div class="response-header">
+        <span class="response-header-icon">✍️</span>
+        <span class="response-header-text">Tu respuesta</span>
+      </div>
+      <textarea class="response-textarea" id="response-textarea" rows="5"
+        placeholder="Tomá un momento para escribir lo que te surge a partir de esta pregunta..."></textarea>
+      <div class="response-footer">
+        <p class="response-label" id="response-label">Escribí algo para recibir una pregunta personalizada</p>
+        <button class="btn-followup" id="btn-followup" disabled>Profundizá más →</button>
+      </div>
+    </div>
     <div class="actions">
       <button class="btn btn-yellow" id="btn-next">Otra pregunta</button>
     </div>
@@ -1098,7 +1174,8 @@ const QUESTIONS = {
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
-let currentAspect = null;
+let currentAspect   = null;
+let currentQuestion = "";
 
 // ── History (7-day retention) ─────────────────────────────────────────────────
 
@@ -1156,6 +1233,7 @@ function showView(name) {
 function animateQuestion(text) {
   const wrap = document.querySelector(".question-wrap");
   const el   = document.getElementById("question-text");
+  currentQuestion = text;
   el.textContent = "\u201C" + text + "\u201D";
   wrap.classList.remove("fade-in");
   void wrap.offsetWidth;
@@ -1190,6 +1268,19 @@ function renderHistory() {
   }).join("");
 }
 
+// ── Response helpers ──────────────────────────────────────────────────────────
+
+function resetResponseArea() {
+  const ta    = document.getElementById("response-textarea");
+  const label = document.getElementById("response-label");
+  const btn   = document.getElementById("btn-followup");
+  ta.value          = "";
+  btn.disabled      = true;
+  btn.textContent   = "Profundizá más →";
+  label.textContent = "Escribí algo para recibir una pregunta personalizada";
+  label.classList.remove("ai-badge");
+}
+
 // ── Navigation ────────────────────────────────────────────────────────────────
 
 function goHome() {
@@ -1212,6 +1303,9 @@ function goAspect(aspect) {
   const btn = document.getElementById("btn-next");
   btn.disabled    = false;
   btn.textContent = "Otra pregunta";
+
+  // Reset response area
+  resetResponseArea();
 
   // Reset history panel
   document.getElementById("history-list").classList.remove("open");
@@ -1263,6 +1357,57 @@ document.getElementById("btn-next").addEventListener("click", () => {
   }
   setQuestion(next);
   addToHistory(currentAspect.slug, next);
+  resetResponseArea();
+});
+
+// ── Follow-up (AI-generated question) ────────────────────────────────────────
+
+document.getElementById("response-textarea").addEventListener("input", function () {
+  document.getElementById("btn-followup").disabled = this.value.trim().length < 10;
+});
+
+document.getElementById("btn-followup").addEventListener("click", async () => {
+  if (!currentAspect || !currentQuestion) return;
+  const ta    = document.getElementById("response-textarea");
+  const label = document.getElementById("response-label");
+  const btn   = document.getElementById("btn-followup");
+
+  const userResponse = ta.value.trim();
+  if (userResponse.length < 10) return;
+
+  btn.textContent = "Generando...";
+  btn.disabled    = true;
+
+  try {
+    const res = await fetch("/api/followup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        aspect:       currentAspect.name,
+        question:     currentQuestion,
+        userResponse,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.question) {
+      animateQuestion(data.question);
+      ta.value      = "";
+      btn.disabled  = true;
+      btn.textContent = "Profundizá más →";
+      label.textContent = "✦ Generada en base a tu reflexión";
+      label.classList.add("ai-badge");
+    } else {
+      label.textContent = data.error || "No pudimos generar la pregunta. Intentá de nuevo.";
+      btn.textContent = "Profundizá más →";
+      btn.disabled    = ta.value.trim().length < 10;
+    }
+  } catch {
+    label.textContent = "Algo salió mal. Verificá tu conexión e intentá de nuevo.";
+    btn.textContent = "Profundizá más →";
+    btn.disabled    = ta.value.trim().length < 10;
+  }
 });
 
 document.getElementById("history-toggle").addEventListener("click", () => {
